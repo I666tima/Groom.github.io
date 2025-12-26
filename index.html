@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Груминг для собак - Выбор породы и услуги</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?2"></script>
+  <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--tg-theme-secondary-bg-color, #f2f2f2);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 16px;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 22px;
+        }
+
+        h2 {
+            margin: 16px 0 8px 0;
+            font-size: 18px;
+            color: var(--tg-theme-text-color, #000000);
+            text-align: center;
+        }
+
+        h3 {
+            margin: 16px 0 8px 0;
+            font-size: 16px;
+            color: var(--tg-theme-text-color, #000000);
+            font-weight: 500;
+        }
+
+        .breed-gallery {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .breed-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .breed-image.active {
+            display: block;
+        }
+
+        .placeholder-image {
+            width: 70px;
+            height: 70px;
+            opacity: 0.3;
+        }
+
+        .selection-path {
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .path-text {
+            color: var(--tg-theme-hint-color, #707579);
+            font-size: 15px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .path-text.highlight {
+            color: var(--tg-theme-button-color, #2481cc);
+            font-weight: 500;
+        }
+
+        .menu-section {
+            margin-bottom: 20px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--tg-theme-text-color, #000000);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .buttons-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .button {
+            background-color: var(--tg-theme-secondary-bg-color, #f2f2f2);
+            border: none;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: var(--tg-theme-text-color, #000000);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        .button:hover {
+            background-color: var(--tg-theme-section-bg-color, #e8e8e8);
+            transform: translateY(-1px);
+        }
+
+        .button.active {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            font-weight: 500;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-button {
+            background-color: transparent;
+            border: 1px solid var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-color, #2481cc);
+            font-size: 14px;
+            padding: 10px 16px;
+            margin-top: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .back-button:hover {
+            background-color: rgba(36, 129, 204, 0.1);
+        }
+
+        .continue-btn-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(to top, var(--tg-theme-secondary-bg-color, #f2f2f2) 80%, transparent);
+            z-index: 100;
+        }
+
+        .continue-button {
+            width: 100%;
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(36, 129, 204, 0.25);
+        }
+
+        .continue-button:disabled {
+            background-color: var(--tg-theme-hint-color, #aaaaaa);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .continue-button:not(:disabled):hover {
+            background-color: var(--tg-theme-button-color, #1a6fb3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(36, 129, 204, 0.35);
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--tg-theme-hint-color, #cccccc);
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .warning-note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            margin-top: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #856404;
+            line-height: 1.5;
+        }
+
+        .warning-note ul {
+            margin: 8px 0 0 20px;
+            padding: 0;
+        }
+
+        .warning-note li {
+            margin-bottom: 4px;
+        }
+
+        .result-message {
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .result-text {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 8px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .breed-gallery {
+                height: 180px;
+            }
+            
+            .menu-section {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐕 Груминг-салон для собак</h1>
+        
+        <div class="step-indicator">
+            <div class="step-dot active" id="step1"></div>
+            <div class="step-dot" id="step2"></div>
+            <div class="step-dot" id="step3"></div>
+        </div>
+        
+        <div class="breed-gallery">
+            <div class="placeholder-image">
+                <svg viewBox="0 0 24 24" width="100%" height="100%">
+                    <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/>
+                </svg>
+            </div>
+            <!-- Изображения для каждой породы -->
+            <img src="https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=500&auto=format&fit=crop" alt="Шпиц" class="breed-image" id="img-spitz">
+            <img src="https://images.unsplash.com/photo-1615497001839-b0a0eac3274c?w=500&auto=format&fit=crop" alt="Йоркширский терьер" class="breed-image" id="img-york">
+            <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop" alt="Пудель" class="breed-image" id="img-poodle">
+            <img src="https://images.unsplash.com/photo-1601979031925-424e53b6caaa?w=500&auto=format&fit=crop" alt="Мальтезе" class="breed-image" id="img-maltese">
+            <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop" alt="Мальтипу" class="breed-image" id="img-maltipoo">
+            <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=500&auto=format&fit=crop" alt="Бишон фризе" class="breed-image" id="img-bichon">
+        </div>
+        
+        <div class="selection-path">
+            <div class="path-text" id="path-text">Выберите породу собаки</div>
+        </div>
+        
+        <!-- Главное меню - выбор породы -->
+        <div class="menu-section" id="breed-section">
+            <div class="section-title">Выберите породу:</div>
+            <div class="buttons-column">
+                <button class="button breed-btn" data-breed="spitz">Шпиц</button>
+                <button class="button breed-btn" data-breed="york">Йоркширский терьер</button>
+                <button class="button breed-btn" data-breed="poodle">Пудель</button>
+                <button class="button breed-btn" data-breed="maltese">Мальтезе</button>
+                <button class="button breed-btn" data-breed="maltipoo">Мальтипу</button>
+                <button class="button breed-btn" data-breed="bichon">Бишон фризе</button>
+            </div>
+        </div>
+        
+        <!-- Меню для Шпица -->
+        <div class="menu-section" id="spitz-type-section" style="display: none;">
+            <div class="section-title">Тип шпица:</div>
+            <div class="buttons-column">
+                <button class="button type-btn" data-type="mini">Мини-померанский</button>
+                <button class="button type-btn" data-type="german">Немецкий</button>
+                <button class="button type-btn" data-type="japanese">Японский</button>
+            </div>
+            <button class="back-button" id="back-to-breeds-from-spitz">
+                ← Назад к выбору породы
+            </button>
+        </div>
+        
+        <div class="menu-section" id="spitz-style-section" style="display: none;">
+            <div class="section-title">Стиль стрижки:</div>
+            <div class="buttons-column">
+                <button class="button style-btn" data-style="short">Укороченная стрижка</button>
+                <button class="button style-btn" data-style="breed">Породная стрижка (не коротко)</button>
+            </div>
+            <button class="back-button" id="back-to-spitz-types">
+                ← Назад к выбору типа
+            </button>
+        </div>
+        
+        <!-- Меню для Йорка -->
+        <div class="menu-section" id="york-size-section" style="display: none;">
+            <div class="section-title">Вес, размер:</div>
+            <div class="buttons-column">
+                <button class="button size-btn" data-size="small">До 3,5 кг</button>
+                <button class="button size-btn" data-size="large">Крупный от 3,5 кг</button>
+            </div>
+            <button class="back-button" id="back-to-breeds-from-york">
+                ← Назад к выбору породы
+            </button>
+        </div>
+        
+        <div class="menu-section" id="york-decoration-section" style="display: none;">
+            <div class="section-title">Оформление украшения лап:</div>
+            <div class="buttons-column">
+                <button class="button decoration-btn" data-decoration="breed">По породе</button>
+                <button class="button decoration-btn" data-decoration="short">Укороченное</button>
+                <button class="button decoration-btn" data-decoration="columns">Столбики (на определенный волос)</button>
+                <button class="button decoration-btn" data-decoration="shave">Брить</button>
+            </div>
+            <button class="back-button" id="back-to-york-size">
+                ← Назад к выбору размера
+            </button>
+        </div>
+        
+        <!-- Меню для Пуделя -->
+        <div class="menu-section" id="poodle-size-section" style="display: none;">
+            <div class="section-title">Размер пуделя:</div>
+            <div class="buttons-column">
+                <button class="button poodle-size-btn" data-size="toy">Той (до 27 см)</button>
+                <button class="button poodle-size-btn" data-size="dwarf">Карликовый (до 35 см)</button>
+                <button class="button poodle-size-btn" data-size="large">Крупный</button>
+            </div>
+            <button class="back-button" id="back-to-breeds-from-poodle">
+                ← Назад к выбору породы
+            </button>
+        </div>
+        
+        <!-- Меню для Мальтипу -->
+        <div class="menu-section" id="maltipoo-type-section" style="display: none;">
+            <div class="section-title">Вид:</div>
+            <div class="buttons-column">
+                <button class="button maltipoo-type-btn" data-type="maltese">Как мальтезе</button>
+                <button class="button maltipoo-type-btn" data-type="poodle">Как пудель</button>
+            </div>
+            <button class="back-button" id="back-to-breeds-from-maltipoo">
+                ← Назад к выбору породы
+            </button>
+        </div>
+        
+        <!-- Меню для Бишона -->
+        <div class="menu-section" id="bichon-size-section" style="display: none;">
+            <div class="section-title">Вес бишона:</div>
+            <div class="buttons-column">
+                <button class="button bichon-size-btn" data-size="small">До 3,5 кг</button>
+                <button class="button bichon-size-btn" data-size="large">От 3,5 кг</button>
+            </div>
+            <button class="back-button" id="back-to-breeds-from-bichon">
+                ← Назад к выбору породы
+            </button>
+        </div>
+        
+        <!-- Сообщение с результатом выбора -->
+        <div class="result-message" id="result-section" style="display: none;">
+            <div class="result-title" id="result-title">Ваш выбор подтвержден!</div>
+            <div class="result-text" id="result-text"></div>
+            <div class="warning-note" id="warning-note" style="display: none;">
+                <strong>Обратите внимание, что стоимость услуг может быть выше, если:</strong>
+                <ul>
+                    <li>ваш питомец проявляет агрессию;</li>
+                    <li>сильно активничает, усложняет сделать его красивым.</li>
+                </ul>
+            </div>
+            <button class="button" id="back-to-start" style="margin-top: 16px; background-color: var(--tg-theme-secondary-bg-color, #f2f2f2);">
+                ← Вернуться к началу
+            </button>
+        </div>
+    </div>
+    
+    <div class="continue-btn-container">
+        <button class="continue-button" id="continue-btn" disabled>Продолжить с выбором</button>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Состояние приложения
+        const state = {
+            selectedBreed: null,
+            selectedBreedName: null,
+            selectedSubOption: null,
+            selectedSubOptionName: null,
+            selectedService: null,
+            selectedServiceName: null,
+            currentStep: 1,
+            currentSection: 'breed'
+        };
+        
+        // Элементы DOM
+        const allSections = {
+            breed: document.getElementById('breed-section'),
+            spitzType: document.getElementById('spitz-type-section'),
+            spitzStyle: document.getElementById('spitz-style-section'),
+            yorkSize: document.getElementById('york-size-section'),
+            yorkDecoration: document.getElementById('york-decoration-section'),
+            poodleSize: document.getElementById('poodle-size-section'),
+            maltipooType: document.getElementById('maltipoo-type-section'),
+            bichonSize: document.getElementById('bichon-size-section'),
+            result: document.getElementById('result-section')
+        };
+        
+        const pathText = document.getElementById('path-text');
+        const continueBtn = document.getElementById('continue-btn');
+        const stepDots = [
+            document.getElementById('step1'),
+            document.getElementById('step2'),
+            document.getElementById('step3')
+        ];
+        const resultTitle = document.getElementById('result-title');
+        const resultText = document.getElementById('result-text');
+        const warningNote = document.getElementById('warning-note');
+        
+        // Названия пород
+        const breedNames = {
+            spitz: 'Шпиц',
+            york: 'Йоркширский терьер',
+            poodle: 'Пудель',
+            maltese: 'Мальтезе',
+            maltipoo: 'Мальтипу',
+            bichon: 'Бишон фризе'
+        };
+        
+        // Названия типов/размеров/услуг
+        const optionNames = {
+            // Шпиц
+            mini: 'Мини-померанский шпиц',
+            german: 'Немецкий шпиц',
+            japanese: 'Японский шпиц',
+            short: 'Укороченная стрижка',
+            breed: 'Породная стрижка (не коротко)',
+            
+            // Йорк
+            small: 'До 3,5 кг',
+            large: 'Крупный от 3,5 кг',
+            breed: 'По породе',
+            short: 'Укороченное',
+            columns: 'Столбики (на определенный волос)',
+            shave: 'Брить',
+            
+            // Пудель
+            toy: 'Той (до 27 см)',
+            dwarf: 'Карликовый (до 35 см)',
+            
+            // Мальтипу
+            maltese: 'Как мальтезе',
+            poodle: 'Как пудель'
+        };
+        
+        // Показать фотографию выбранной породы
+        function showBreedImage(breedId) {
+            document.querySelectorAll('.breed-image').forEach(img => {
+                img.classList.remove('active');
+            });
+            
+            const imgElement = document.getElementById(`img-${breedId}`);
+            if (imgElement) {
+                imgElement.classList.add('active');
+            }
+        }
+        
+        // Обновить текст пути выбора
+        function updatePathText() {
+            let path = '';
+            
+            if (state.selectedBreed) {
+                path += `<span class="highlight">${state.selectedBreedName}</span>`;
+                
+                if (state.selectedSubOption) {
+                    path += ` → <span class="highlight">${state.selectedSubOptionName}</span>`;
+                }
+                
+                if (state.selectedService) {
+                    path += ` → <span class="highlight">${state.selectedServiceName}</span>`;
+                }
+            } else {
+                path = 'Выберите породу собаки';
+            }
+            
+            pathText.innerHTML = path;
+        }
